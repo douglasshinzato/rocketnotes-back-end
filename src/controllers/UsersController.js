@@ -34,10 +34,14 @@ class UsersController {
   }
   async update(request, response) {
     const { name, email, password, old_password } = request.body
-    const { id } = request.params
+
+    const user_id = request.user.id
+    // Não estava encontrando o usuário antes porque eu tinha colocado chaves {} em user_id, dando a entender que minha intenção era de desestruturar o objeto.
 
     const database = await sqliteConnection()
-    const user = await database.get("SELECT * FROM users WHERE id = (?)", [id])
+    const user = await database.get("SELECT * FROM users WHERE id = (?)", [
+      user_id,
+    ])
 
     if (!user) {
       throw new AppError("Usuário não encontrado")
@@ -79,7 +83,7 @@ class UsersController {
       password = ?,
       updated_at = DATETIME('now')
       WHERE id = ?`,
-      [user.name, user.email, user.password, id]
+      [user.name, user.email, user.password, user_id]
     )
     return response.json()
   }
